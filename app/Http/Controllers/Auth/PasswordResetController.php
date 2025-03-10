@@ -1,5 +1,6 @@
 <?php
-namespace App\Http\Controllers;
+
+namespace App\Http\Controllers\Auth;
 
 use App\Http\Requests\CheckEmailRequest;
 use App\Http\Requests\SendResetCodeRequest;
@@ -7,8 +8,9 @@ use App\Http\Requests\ResetPasswordRequest;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\PasswordResetToken;
+use Illuminate\Support\Facades\Log;
 
-class PasswordResetController extends Controller
+class PasswordResetController extends AuthController
 {
     public function checkEmail(CheckEmailRequest $request)
     {
@@ -36,11 +38,15 @@ class PasswordResetController extends Controller
             ['token' => Hash::make($code), 'created_at' => now()]
         );
 
-        return response()->json(['message' => 'Reset code has been sent'], 200);
+       // return response()->json(['message' => 'Reset code has been sent'], 200);
+        return response()->json(['message' => 'Reset code sent', 'token' => $code]);
+
     }
 
     public function resetPassword(ResetPasswordRequest $request)
     {
+        Log::info(PasswordResetToken::where('email', $request->email)->toSql());
+
         $record = PasswordResetToken::where('email', $request->email)
             ->where('created_at', '>=', now()->subMinutes(10))
             ->first();

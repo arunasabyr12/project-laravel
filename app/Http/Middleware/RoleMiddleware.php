@@ -16,10 +16,18 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, string $role): Response
     {
-        if (!Auth::check() || Auth::user()->role->slug !== $role) {
-            return response()->json(['message' => 'Access denied'], 403);
+        if (!auth()->check()) {
+            return response()->json(['message' => 'unauthorizedd'], Response::HTTP_UNAUTHORIZED);
+        } 
+
+        if (auth()->user()->role !== $role) {
+            return response()->json(['message' => 'Forbidden'], Response::HTTP_FORBIDDEN);
         }
 
         return $next($request);
+        
     }
+    
+        
+    
 }
